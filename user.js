@@ -2,11 +2,11 @@ require('dotenv').config();
 const { Router } = require("express");
 const userRouter = Router();
 const bcrypt = require("bcrypt");
-const { userModel, purchaseModel } = require("./db");
+const { userModel, purchaseModel, courseModel } = require("./db");
 const {z} = require("zod");
 const jwt = require("jsonwebtoken");
 const secret = process.env.JWT_UserSecret;
-const {userMiddleware} = require("../middlewares.user.js")
+const {userMiddleware} = require("./middlewares/user.js")
 
 userRouter.post("/signup", async (req, res)=>{
     const requireBody = z.object({
@@ -69,6 +69,9 @@ userRouter.post("/purchases", userMiddleware, async (req, res)=>{
     const purchases = await purchaseModel.find({
         userId
     });
+    const courseData = await courseModel.find({
+        _id: {$in: purchases.map(x => x.courseId)}
+    }) 
     res.json({
         purchases
     })
